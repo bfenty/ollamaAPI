@@ -48,9 +48,21 @@ func init() {
 	prometheus.MustRegister(requestDuration)
 }
 
+// Define a custom handler for /metrics that checks for API key
+func metricsHandler(w http.ResponseWriter, r *http.Request) {
+	providedKey := r.Header.Get("X-API-Key")
+	if providedKey != apiKey {
+		log.Printf("Unauthorized request to /metrics from %s", r.RemoteAddr)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	promhttp.Handler().ServeHTTP(w, r)
+}
+
 func main() {
 	http.HandleFunc("/", proxyHandler)
-	http.Handle("/metrics", promhttp.Handler())
+	// Register the custom handler for /metrics
+	http.HandleFunc("/metrics", metricsHandler)
 
 	log.Println("Starting Ollama proxy on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
