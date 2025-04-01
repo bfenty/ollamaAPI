@@ -73,6 +73,13 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
 	providedKey := r.Header.Get("X-API-Key")
+	if providedKey == "" {
+		// Try standard OpenAI-style header
+		authHeader := r.Header.Get("Authorization")
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			providedKey = strings.TrimPrefix(authHeader, "Bearer ")
+		}
+	}
 	log.Printf("Provided API key: %s", providedKey) // Added for debugging purposes
 	if providedKey != apiKey {
 		log.Printf("Unauthorized request to %s from %s", r.URL.Path, r.RemoteAddr)
