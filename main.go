@@ -44,6 +44,7 @@ func init() {
 		log.Fatal("Missing required environment variables: OLLAMA_PROXY_KEY and/or OLLAMA_URL")
 	}
 
+	log.Printf("Loaded API key: %s", apiKey) // Added for debugging purposes
 	prometheus.MustRegister(requestCount)
 	prometheus.MustRegister(requestDuration)
 }
@@ -72,6 +73,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
 	providedKey := r.Header.Get("X-API-Key")
+	log.Printf("Provided API key: %s", providedKey) // Added for debugging purposes
 	if providedKey != apiKey {
 		log.Printf("Unauthorized request to %s from %s", r.URL.Path, r.RemoteAddr)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
